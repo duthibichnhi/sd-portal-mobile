@@ -6,6 +6,7 @@
   <title>Cần thực hiện</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -335,12 +336,71 @@
       box-shadow: 0 1px 1px rgba(26,26,26,0.05);
     }
 
+    /* ── Map screen ───────────────────────────────────── */
+    .map-header {
+      flex-shrink: 0; height: 64px;
+      background: white; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 4px; padding: 0 12px;
+    }
+    .map-back-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; padding: 4px;
+      background: none; border: none; cursor: pointer; flex-shrink: 0;
+    }
+    .map-title { flex: 1; font-size: 18px; font-weight: 500; color: #09090b; line-height: 28px; }
+    .map-filter-bar {
+      flex-shrink: 0; background: white; border-bottom: 1px solid var(--border);
+      padding: 8px 12px; overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+    }
+    .map-filter-bar::-webkit-scrollbar { display: none; }
+    .map-filter-chips { display: flex; gap: 8px; width: max-content; }
+    .map-chip {
+      display: flex; align-items: center; gap: 6px;
+      height: 32px; padding: 0 10px; border-radius: 9999px;
+      border: 1px solid var(--slate-300); background: white;
+      font-size: 14px; font-weight: 500; color: #09090b;
+      cursor: pointer; white-space: nowrap; flex-shrink: 0;
+      box-shadow: 0 1px 1px rgba(26,26,26,0.05);
+    }
+    .map-chip.selected { border-color: #0f172a; background: var(--slate-50); }
+    .map-area { flex: 1; min-height: 0; position: relative; overflow: hidden; }
+    #leaflet-map { width: 100%; height: 100%; }
+    .leaflet-control-attribution { display: none !important; }
+    .map-sheet {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: white; border-radius: 16px 16px 0 0;
+      box-shadow: 0 -4px 3px rgba(26,26,26,0.05), 0 -8px 5px rgba(26,26,26,0.05);
+      height: 275px; display: flex; flex-direction: column; overflow: hidden;
+      z-index: 1000;
+    }
+    .sheet-handle-wrap {
+      flex-shrink: 0; display: flex; align-items: center; justify-content: center; padding: 12px;
+    }
+    .sheet-handle { width: 52px; height: 4px; background: var(--slate-200); border-radius: 100px; }
+    .sheet-list {
+      flex: 1; overflow-y: auto; scrollbar-width: none;
+      background: var(--slate-100); display: flex; flex-direction: column; gap: 8px;
+    }
+    .sheet-list::-webkit-scrollbar { display: none; }
+    .sheet-item { display: flex; align-items: center; gap: 8px; background: white; padding: 8px 12px; }
+    .sheet-num { font-size: 16px; font-weight: 600; color: #0f172a; min-width: 24px; text-align: center; }
+    .sheet-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+    .sheet-name { font-size: 16px; font-weight: 600; color: #0f172a; line-height: 24px; }
+    .sheet-addr { font-size: 12px; color: var(--slate-500); line-height: 16px; }
+    .sheet-nav-btn {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: white; border: 1px solid var(--slate-300); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; box-shadow: 0 1px 1px rgba(26,26,26,0.05);
+    }
+
     /* ── Detail screens slide from bottom ─────────────── */
     #screen-detail-giao,
     #screen-detail-thu-no { z-index: 10; }
     #screen-detail-giao.off-right,
     #screen-detail-thu-no.off-right { transform: translateY(100%); }
-    #screen-list.off-left { transform: translateX(0); }
+    /* list screen stays in place when detail slides up — handled in JS */
+    #screen-list.stay { transform: translateX(0); }
 
     /* ── Payment modal ────────────────────────────────── */
     .modal-overlay {
@@ -477,7 +537,7 @@
                 </div>
               </div>
             </div>
-            <button class="btn-secondary">
+            <button class="btn-secondary" id="btn-map">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
                 <line x1="9" y1="3" x2="9" y2="18"/>
@@ -763,6 +823,69 @@
 
   </div><!-- /screen-detail-thu-no -->
 
+  <!-- ══ SCREEN: MAP ══════════════════════════════════ -->
+  <div class="screen off-right" id="screen-map">
+
+    <div class="map-header">
+      <button class="map-back-btn" id="close-map">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <span class="map-title">Bản đồ dẫn đường</span>
+    </div>
+
+    <div class="map-filter-bar">
+      <div class="map-filter-chips">
+        <div class="map-chip selected" data-map-filter="Tất cả">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          Tất cả
+        </div>
+        <div class="map-chip" data-map-filter="Giao & Thu nợ">Giao &amp; Thu nợ</div>
+        <div class="map-chip" data-map-filter="Giao hàng">Giao hàng</div>
+        <div class="map-chip" data-map-filter="Thu nợ">Thu nợ</div>
+      </div>
+    </div>
+
+    <div class="map-area">
+      <div id="leaflet-map"></div>
+      <div class="map-sheet">
+        <div class="sheet-handle-wrap"><div class="sheet-handle"></div></div>
+        <div class="sheet-list">
+          <div class="sheet-item" data-map-type="Giao hàng">
+            <div class="sheet-num">1</div>
+            <div class="sheet-info">
+              <div class="sheet-name">Tạp hoá cô Thu</div>
+              <div class="sheet-addr">12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh</div>
+            </div>
+            <button class="sheet-nav-btn" onclick="openNav(10.7655,106.6866,'Tạp hoá cô Thu')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            </button>
+          </div>
+          <div class="sheet-item" data-map-type="Giao & Thu nợ">
+            <div class="sheet-num">2</div>
+            <div class="sheet-info">
+              <div class="sheet-name">Tạp hoá chú Chín</div>
+              <div class="sheet-addr">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</div>
+            </div>
+            <button class="sheet-nav-btn" onclick="openNav(10.7807,106.6852,'Tạp hoá chú Chín')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            </button>
+          </div>
+          <div class="sheet-item" data-map-type="Thu nợ">
+            <div class="sheet-num">3</div>
+            <div class="sheet-info">
+              <div class="sheet-name">Tạp hoá Sáu Nở</div>
+              <div class="sheet-addr">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</div>
+            </div>
+            <button class="sheet-nav-btn" onclick="openNav(10.7810,106.6848,'Tạp hoá Sáu Nở')">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /screen-map -->
+
   <!-- ══ PAYMENT MODAL ════════════════════════════════ -->
   <div class="modal-overlay" id="modal-thu-tien">
     <div class="modal-dialog">
@@ -839,6 +962,7 @@
 
 </div><!-- /phone -->
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
   // ── Card data ──────────────────────────────────────
   const CARDS = {
@@ -890,28 +1014,40 @@
   let currentCardId = null;
 
   // ── Screen navigation ───────────────────────────────
+  const DETAIL_SCREENS = ['screen-detail-giao', 'screen-detail-thu-no'];
+
   function showScreen(id) {
+    const isDetail = DETAIL_SCREENS.includes(id);
+
     document.querySelectorAll('.screen').forEach(s => {
-      s.classList.remove('active', 'off-right', 'off-left');
+      s.classList.remove('active', 'off-right', 'off-left', 'stay');
       s.classList.add('off-right');
     });
-    const target = document.getElementById(id);
-    target.classList.remove('off-right');
-    target.classList.add('active');
 
-    if (id !== 'screen-list') {
-      document.getElementById('screen-list').classList.remove('off-right');
-      document.getElementById('screen-list').classList.add('off-left');
+    document.getElementById(id).classList.remove('off-right');
+    document.getElementById(id).classList.add('active');
+
+    const list = document.getElementById('screen-list');
+    list.classList.remove('off-right');
+    if (isDetail) {
+      list.classList.add('stay');   // stays in place, detail slides up over it
+    } else {
+      list.classList.add('off-left'); // normal horizontal parallax
+    }
+
+    if (id === 'screen-map') {
+      setTimeout(() => { initMap(); if (mapInstance) mapInstance.invalidateSize(); }, 350);
     }
   }
 
   function goBack() {
-    document.querySelectorAll('.screen').forEach(s => {
-      s.classList.remove('active', 'off-right', 'off-left');
-      s.classList.add('off-right');
-    });
+    const active = document.querySelector('.screen.active');
+    if (!active) return;
+    active.classList.remove('active');
+    active.classList.add('off-right');
+
     const list = document.getElementById('screen-list');
-    list.classList.remove('off-right');
+    list.classList.remove('off-left', 'off-right', 'stay');
     list.classList.add('active');
   }
 
@@ -1030,6 +1166,57 @@
   document.addEventListener('click', () => {
     menu.classList.remove('open');
     trigger.classList.remove('open');
+  });
+
+  // ── Map ─────────────────────────────────────────────
+  const MAP_LOCATIONS = [
+    { num: 1, name: 'Tạp hoá cô Thu',   lat: 10.7655, lng: 106.6866, type: 'Giao hàng' },
+    { num: 2, name: 'Tạp hoá chú Chín', lat: 10.7807, lng: 106.6852, type: 'Giao & Thu nợ' },
+    { num: 3, name: 'Tạp hoá Sáu Nở',  lat: 10.7810, lng: 106.6848, type: 'Thu nợ' },
+  ];
+  let mapInstance = null;
+  let mapMarkers = [];
+
+  function initMap() {
+    if (mapInstance) return;
+    mapInstance = L.map('leaflet-map', {
+      center: [10.7730, 106.6859], zoom: 14,
+      zoomControl: false, attributionControl: false,
+    });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+
+    MAP_LOCATIONS.forEach(loc => {
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="width:30px;height:30px;background:#09090b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#f8fafc;font-weight:600;font-size:14px;font-family:Inter,sans-serif;box-shadow:0 4px 3px rgba(26,26,26,.05),0 10px 8px rgba(26,26,26,.05)">${loc.num}</div>`,
+        iconSize: [30, 30], iconAnchor: [15, 15],
+      });
+      const marker = L.marker([loc.lat, loc.lng], { icon }).addTo(mapInstance);
+      mapMarkers.push({ marker, type: loc.type });
+    });
+  }
+
+  function openNav(lat, lng, name) {
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`, '_blank');
+  }
+
+  document.getElementById('btn-map').addEventListener('click', () => showScreen('screen-map'));
+  document.getElementById('close-map').addEventListener('click', goBack);
+
+  document.querySelectorAll('.map-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.map-chip').forEach(c => c.classList.remove('selected'));
+      chip.classList.add('selected');
+      const filter = chip.dataset.mapFilter;
+      mapMarkers.forEach(({ marker, type }) => {
+        const el = marker.getElement();
+        if (el) el.style.opacity = (filter === 'Tất cả' || type === filter) ? '1' : '0.25';
+      });
+      document.querySelectorAll('.sheet-item').forEach((item) => {
+        const t = item.dataset.mapType;
+        item.style.display = (filter === 'Tất cả' || t === filter) ? '' : 'none';
+      });
+    });
   });
 
   // ── Payment modal ────────────────────────────────────
