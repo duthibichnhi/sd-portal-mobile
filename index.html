@@ -513,7 +513,7 @@
         <div class="cards-list">
 
           <!-- Card 1 -->
-          <div class="task-card">
+          <div class="task-card" data-type="Giao hàng">
             <div class="card-header">
               <div class="card-title-row">
                 <span class="card-name">Tạp hoá cô Thu</span>
@@ -543,7 +543,7 @@
           </div>
 
           <!-- Card 2 -->
-          <div class="task-card">
+          <div class="task-card" data-type="Giao & Thu nợ">
             <div class="card-header">
               <div class="card-title-row">
                 <span class="card-name">Tạp hoá chú Chín</span>
@@ -577,7 +577,7 @@
           </div>
 
           <!-- Card 3 -->
-          <div class="task-card">
+          <div class="task-card" data-type="Thu nợ">
             <div class="card-header">
               <div class="card-title-row">
                 <span class="card-name">Tạp hoá Sáu Nở</span>
@@ -689,6 +689,13 @@
     trigger.classList.toggle('open', isOpen);
   });
 
+  function filterCards(value) {
+    document.querySelectorAll('.task-card').forEach(card => {
+      const show = value === 'Tất cả' || card.dataset.type === value;
+      card.style.display = show ? '' : 'none';
+    });
+  }
+
   menu.querySelectorAll('.dropdown-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -698,6 +705,7 @@
       item.classList.add('selected');
       menu.classList.remove('open');
       trigger.classList.remove('open');
+      filterCards(value);
     });
   });
 
