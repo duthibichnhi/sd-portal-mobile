@@ -334,6 +334,105 @@
       font-family: 'Inter', sans-serif; cursor: pointer;
       box-shadow: 0 1px 1px rgba(26,26,26,0.05);
     }
+
+    /* ── Detail screens slide from bottom ─────────────── */
+    #screen-detail-giao,
+    #screen-detail-thu-no { z-index: 10; }
+    #screen-detail-giao.off-right,
+    #screen-detail-thu-no.off-right { transform: translateY(100%); }
+    #screen-list.off-left { transform: translateX(0); }
+
+    /* ── Payment modal ────────────────────────────────── */
+    .modal-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px; z-index: 200;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+    .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+    .modal-dialog {
+      background: white; border: 1px solid var(--slate-300);
+      border-radius: 14px; width: 100%; max-height: 90%;
+      overflow-y: auto; scrollbar-width: none;
+      position: relative; display: flex; flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(26,26,26,0.05), 0 2px 4px -2px rgba(26,26,26,0.05);
+    }
+    .modal-dialog::-webkit-scrollbar { display: none; }
+
+    .modal-close-btn {
+      position: absolute; top: 14px; right: 14px;
+      background: none; border: none; cursor: pointer;
+      width: 20px; height: 20px;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0.7; padding: 0;
+    }
+
+    .modal-head { padding: 16px; display: flex; flex-direction: column; gap: 6px; }
+    .modal-title { font-size: 18px; font-weight: 500; color: #09090b; line-height: 28px; }
+    .modal-subtitle { font-size: 14px; font-weight: 400; color: var(--slate-500); line-height: 20px; }
+
+    .modal-body { padding: 0 16px 24px; display: flex; flex-direction: column; gap: 16px; }
+
+    .modal-table {
+      background: white; border: 1px solid var(--slate-200);
+      border-radius: 8px; overflow: hidden;
+    }
+    .modal-table-head {
+      background: var(--slate-50); border-bottom: 1px solid #e4e4e7;
+      height: 40px; display: flex; align-items: center;
+      padding: 0 8px; font-size: 14px; font-weight: 500; color: var(--slate-500);
+    }
+    .modal-table-row { display: flex; border-bottom: 1px solid #e4e4e7; }
+    .modal-table-row:last-child { border-bottom: none; }
+    .modal-tcell-main { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .modal-tcell-right { flex: 1; padding: 8px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+    .modal-tcell-name { font-size: 14px; font-weight: 500; color: #09090b; line-height: 1; }
+    .modal-tcell-desc { font-size: 14px; font-weight: 400; color: var(--slate-500); line-height: 20px; }
+    .modal-tcell-lbl  { font-size: 14px; font-weight: 400; color: var(--slate-500); line-height: 1; white-space: nowrap; }
+    .modal-tcell-val  { font-size: 14px; font-weight: 400; color: #09090b; line-height: 20px; white-space: nowrap; }
+    .modal-table-footer {
+      background: var(--slate-50); height: 48px;
+      display: flex; align-items: center; padding: 0 8px;
+    }
+    .modal-footer-lbl { flex: 1; font-size: 14px; font-weight: 500; color: #09090b; }
+    .modal-footer-val { font-size: 16px; font-weight: 600; color: #09090b; }
+
+    .modal-section { display: flex; flex-direction: column; gap: 8px; }
+    .modal-section-title { font-size: 16px; font-weight: 500; color: #0f172a; line-height: 24px; }
+    .modal-radio-group { display: flex; gap: 16px; }
+    .modal-radio-item {
+      flex: 1; display: flex; align-items: center; gap: 8px;
+      padding: 16px; border-radius: 10px;
+      border: 1px solid var(--slate-300); background: white;
+      cursor: pointer; font-size: 14px; font-weight: 500; color: #09090b;
+    }
+    .modal-radio-item.selected { border-color: var(--primary); background: rgba(37,99,235,0.05); }
+
+    .radio-dot {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 1px solid var(--slate-300); background: white;
+      flex-shrink: 0; position: relative;
+      box-shadow: 0 1px 1px rgba(26,26,26,0.05);
+    }
+    .radio-dot.selected { border-color: var(--primary); }
+    .radio-dot.selected::after {
+      content: ''; position: absolute;
+      top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--primary);
+    }
+
+    .modal-foot {
+      background: white; padding: 16px;
+      border-top: 1px solid var(--slate-200);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .modal-amount-row { display: flex; align-items: center; gap: 16px; white-space: nowrap; }
+    .modal-amount-lbl { font-size: 14px; color: var(--slate-500); }
+    .modal-amount-val { flex: 1; font-size: 16px; font-weight: 600; color: #16a34a; text-align: right; }
   </style>
 </head>
 <body>
@@ -658,11 +757,85 @@
     </div>
 
     <div class="detail-bottom">
-      <button class="btn-confirm">Thu tiền</button>
+      <button class="btn-confirm" id="thuno-btn-confirm">Thu tiền</button>
       <button class="btn-cancel">Huỷ</button>
     </div>
 
   </div><!-- /screen-detail-thu-no -->
+
+  <!-- ══ PAYMENT MODAL ════════════════════════════════ -->
+  <div class="modal-overlay" id="modal-thu-tien">
+    <div class="modal-dialog">
+      <button class="modal-close-btn" id="modal-close">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+
+      <div class="modal-head">
+        <p class="modal-title" id="modal-pt-title">Phiếu thu PT50000</p>
+        <p class="modal-subtitle" id="modal-pt-subtitle">Tạp hoá cô Thu · 99916243</p>
+      </div>
+
+      <div class="modal-body">
+        <div class="modal-table">
+          <div class="modal-table-head">SO công nợ gắn với phiếu (1)</div>
+          <div class="modal-table-row">
+            <div class="modal-tcell-main">
+              <div class="modal-tcell-name">DH200010</div>
+              <div class="modal-tcell-desc">23/04/2026</div>
+            </div>
+            <div class="modal-tcell-right">
+              <div class="modal-tcell-lbl">Đã thu</div>
+              <div class="modal-tcell-val" id="modal-da-thu">0 ₫</div>
+            </div>
+            <div class="modal-tcell-right">
+              <div class="modal-tcell-lbl">Nợ cần thu</div>
+              <div class="modal-tcell-val" id="modal-no-can-thu">2.500.000 ₫</div>
+            </div>
+          </div>
+          <div class="modal-table-footer">
+            <span class="modal-footer-lbl">Tổng cần thu</span>
+            <span class="modal-footer-val" id="modal-tong-thu">2.500.000 ₫</span>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Mức thu</div>
+          <div class="modal-radio-group">
+            <div class="modal-radio-item selected" data-group="muc-thu">
+              <div class="radio-dot selected"></div>
+              <span>Thu toàn bộ</span>
+            </div>
+            <div class="modal-radio-item" data-group="muc-thu">
+              <div class="radio-dot"></div>
+              <span>Thu một phần</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-section">
+          <div class="modal-section-title">Hình thức thanh toán</div>
+          <div class="modal-radio-group">
+            <div class="modal-radio-item" data-group="hinh-thuc">
+              <div class="radio-dot"></div>
+              <span>Chuyển khoản</span>
+            </div>
+            <div class="modal-radio-item selected" data-group="hinh-thuc">
+              <div class="radio-dot selected"></div>
+              <span>Tiền mặt</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <div class="modal-amount-row">
+          <span class="modal-amount-lbl">Ghi nhận đã thu</span>
+          <span class="modal-amount-val" id="modal-ghi-nhan">2.500.000 ₫</span>
+        </div>
+        <button class="btn-confirm">Xác nhận thu tiền</button>
+      </div>
+    </div>
+  </div>
 
 </div><!-- /phone -->
 
@@ -712,6 +885,9 @@
       noVal: '2.500.000 ₫',
     },
   };
+
+  // ── Current card tracking ───────────────────────────
+  let currentCardId = null;
 
   // ── Screen navigation ───────────────────────────────
   function showScreen(id) {
@@ -782,6 +958,7 @@
   document.querySelectorAll('.btn-detail').forEach(btn => {
     btn.addEventListener('click', () => {
       const cardId = btn.dataset.card;
+      currentCardId = cardId;
       const card   = CARDS[cardId];
       if (card.screen === 'giao') {
         populateGiao(card);
@@ -853,6 +1030,52 @@
   document.addEventListener('click', () => {
     menu.classList.remove('open');
     trigger.classList.remove('open');
+  });
+
+  // ── Payment modal ────────────────────────────────────
+  function openModal(cardId) {
+    const card   = CARDS[cardId];
+    const amount = card.noVal || card.total || '';
+    document.getElementById('modal-pt-title').textContent    = 'Phiếu thu PT50000';
+    document.getElementById('modal-pt-subtitle').textContent = card.name + ' · ' + card.phone;
+    document.getElementById('modal-da-thu').textContent      = '0 ₫';
+    document.getElementById('modal-no-can-thu').textContent  = amount;
+    document.getElementById('modal-tong-thu').textContent    = amount;
+    document.getElementById('modal-ghi-nhan').textContent    = amount;
+    // reset radios to default
+    document.querySelectorAll('.modal-radio-item[data-group="muc-thu"]').forEach((el, i) => {
+      el.classList.toggle('selected', i === 0);
+      el.querySelector('.radio-dot').classList.toggle('selected', i === 0);
+    });
+    document.querySelectorAll('.modal-radio-item[data-group="hinh-thuc"]').forEach((el, i) => {
+      el.classList.toggle('selected', i === 1);
+      el.querySelector('.radio-dot').classList.toggle('selected', i === 1);
+    });
+    document.getElementById('modal-thu-tien').classList.add('open');
+  }
+
+  function closeModal() {
+    document.getElementById('modal-thu-tien').classList.remove('open');
+  }
+
+  document.getElementById('giao-btn-confirm').addEventListener('click', () => openModal(currentCardId));
+  document.getElementById('thuno-btn-confirm').addEventListener('click', () => openModal(currentCardId));
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-thu-tien').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-thu-tien')) closeModal();
+  });
+
+  // Radio toggle
+  document.querySelectorAll('.modal-radio-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const group = item.dataset.group;
+      document.querySelectorAll(`.modal-radio-item[data-group="${group}"]`).forEach(i => {
+        i.classList.remove('selected');
+        i.querySelector('.radio-dot').classList.remove('selected');
+      });
+      item.classList.add('selected');
+      item.querySelector('.radio-dot').classList.add('selected');
+    });
   });
 </script>
 </body>
