@@ -501,6 +501,18 @@
       color: #65758b; font-size: 14px; cursor: pointer;
     }
     .modal-upload-area svg { opacity: 0.7; }
+    .modal-partial-field { display: none; flex-direction: column; gap: 4px; }
+    .modal-partial-field.visible { display: flex; }
+    .modal-partial-field label { font-size: 14px; font-weight: 400; color: #0f172a; }
+    .modal-partial-input {
+      height: 40px; border: 1px solid #cbd5e1; border-radius: 10px;
+      padding: 0 10px; font-size: 14px; font-family: Inter, sans-serif;
+      color: #09090b; width: 100%; box-sizing: border-box;
+      box-shadow: 0 1px 2px rgba(26,26,26,0.05);
+    }
+    .modal-partial-input:focus { outline: none; border-color: var(--primary); }
+    .modal-upload-section { display: flex; flex-direction: column; gap: 6px; }
+    .modal-upload-section.hidden { display: none; }
   </style>
 </head>
 <body>
@@ -912,30 +924,34 @@
         <div class="modal-section">
           <div class="modal-section-title">Mức thu</div>
           <div class="modal-radio-group">
-            <div class="modal-radio-item selected" data-group="muc-thu">
+            <div class="modal-radio-item selected" data-group="muc-thu" data-value="toan-bo">
               <div class="radio-dot selected"></div>
               <span>Thu toàn bộ</span>
             </div>
-            <div class="modal-radio-item" data-group="muc-thu">
+            <div class="modal-radio-item" data-group="muc-thu" data-value="mot-phan">
               <div class="radio-dot"></div>
               <span>Thu một phần</span>
             </div>
+          </div>
+          <div class="modal-partial-field" id="modal-partial-field">
+            <label>Số tiền thu</label>
+            <input class="modal-partial-input" id="modal-partial-input" type="text" inputmode="numeric" placeholder="" />
           </div>
         </div>
 
         <div class="modal-section">
           <div class="modal-section-title">Hình thức thanh toán</div>
           <div class="modal-radio-group">
-            <div class="modal-radio-item selected" data-group="hinh-thuc">
+            <div class="modal-radio-item selected" data-group="hinh-thuc" data-value="chuyen-khoan">
               <div class="radio-dot selected"></div>
               <span>Chuyển khoản</span>
             </div>
-            <div class="modal-radio-item" data-group="hinh-thuc">
+            <div class="modal-radio-item" data-group="hinh-thuc" data-value="tien-mat">
               <div class="radio-dot"></div>
               <span>Tiền mặt</span>
             </div>
           </div>
-          <div class="modal-section" style="gap:6px">
+          <div class="modal-upload-section" id="modal-upload-section">
             <div style="font-size:14px;font-weight:400;color:#0f172a">Hình ảnh chứng từ (0)</div>
             <div class="modal-upload-area">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
@@ -1280,6 +1296,10 @@
       el.classList.toggle('selected', i === 0);
       el.querySelector('.radio-dot').classList.toggle('selected', i === 0);
     });
+    // Reset conditional fields
+    document.getElementById('modal-partial-field').classList.remove('visible');
+    document.getElementById('modal-partial-input').value = '';
+    document.getElementById('modal-upload-section').classList.remove('hidden');
     document.getElementById('modal-thu-tien').classList.add('open');
   }
 
@@ -1304,7 +1324,28 @@
       });
       item.classList.add('selected');
       item.querySelector('.radio-dot').classList.add('selected');
+
+      if (group === 'muc-thu') {
+        const isMot = item.dataset.value === 'mot-phan';
+        document.getElementById('modal-partial-field').classList.toggle('visible', isMot);
+        if (!isMot) {
+          // restore full amount
+          const card = CARDS[currentCardId];
+          document.getElementById('modal-ghi-nhan').textContent = card ? (card.tongCanThu || '') : '';
+        }
+      }
+      if (group === 'hinh-thuc') {
+        const isMat = item.dataset.value === 'tien-mat';
+        document.getElementById('modal-upload-section').classList.toggle('hidden', isMat);
+      }
     });
+  });
+
+  document.getElementById('modal-partial-input').addEventListener('input', function() {
+    const raw = this.value.replace(/\D/g, '');
+    const num = parseInt(raw, 10);
+    document.getElementById('modal-ghi-nhan').textContent =
+      isNaN(num) ? '0 ₫' : num.toLocaleString('vi-VN') + ' ₫';
   });
 </script>
 </body>
