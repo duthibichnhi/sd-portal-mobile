@@ -184,6 +184,11 @@
 
     .filter-left { flex: 1; }
 
+    .dropdown-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
     .dropdown-trigger {
       display: inline-flex;
       align-items: center;
@@ -198,6 +203,51 @@
       color: var(--slate-900);
       cursor: pointer;
       white-space: nowrap;
+      user-select: none;
+    }
+
+    .dropdown-trigger .chevron {
+      transition: transform 0.2s ease;
+    }
+    .dropdown-trigger.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      min-width: 160px;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px -2px rgba(26,26,26,0.05), 0 4px 6px -1px rgba(26,26,26,0.05);
+      z-index: 50;
+      overflow: hidden;
+      padding: 4px;
+    }
+
+    .dropdown-menu.open {
+      display: block;
+    }
+
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 400;
+      color: #09090b;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .dropdown-item:hover,
+    .dropdown-item.selected {
+      background: #f1f5f9;
+      color: #18181b;
     }
 
     .btn-secondary {
@@ -434,11 +484,19 @@
         <!-- Filter row -->
         <div class="filter-row">
           <div class="filter-left">
-            <div class="dropdown-trigger">
-              Phân loại: Tất cả
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4 6L8 10L12 6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
+            <div class="dropdown-wrap">
+              <div class="dropdown-trigger" id="dropdownTrigger">
+                <span id="dropdownLabel">Phân loại: Tất cả</span>
+                <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                  <path d="M4 6L8 10L12 6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <div class="dropdown-menu" id="dropdownMenu">
+                <div class="dropdown-item selected" data-value="Tất cả">Tất cả</div>
+                <div class="dropdown-item" data-value="Giao hàng">Giao hàng</div>
+                <div class="dropdown-item" data-value="Giao &amp; Thu nợ">Giao &amp; Thu nợ</div>
+                <div class="dropdown-item" data-value="Thu nợ">Thu nợ</div>
+              </div>
             </div>
           </div>
           <button class="btn-secondary">
@@ -618,6 +676,34 @@
       document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
       tab.classList.add('active');
     });
+  });
+
+  // Dropdown
+  const trigger = document.getElementById('dropdownTrigger');
+  const menu    = document.getElementById('dropdownMenu');
+  const label   = document.getElementById('dropdownLabel');
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = menu.classList.toggle('open');
+    trigger.classList.toggle('open', isOpen);
+  });
+
+  menu.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const value = item.dataset.value;
+      label.textContent = 'Phân loại: ' + value;
+      menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+      item.classList.add('selected');
+      menu.classList.remove('open');
+      trigger.classList.remove('open');
+    });
+  });
+
+  document.addEventListener('click', () => {
+    menu.classList.remove('open');
+    trigger.classList.remove('open');
   });
 </script>
 
