@@ -1017,8 +1017,8 @@
       confirmBtn: 'Thu tiền và xác nhận giao',
       modalType: 'giao-thu-no',
       debtOrders: [
-        { so: 'DH200010', date: '23/04/2026', daThu: '2.500.000 ₫', canThu: '2.500.000 ₫' },
-        { so: 'DH200011', date: '23/05/2026', daThu: '_',            canThu: '7.500.000 ₫' },
+        { so: 'DH200010', date: '23/04/2026', daThu: '2.500.000 ₫', canThu: '2.500.000 ₫', col3: 'Nợ cần thu' },
+        { so: 'DH200011', date: '23/05/2026', daThu: '_',            canThu: '7.500.000 ₫', col3: 'Cần thu' },
       ],
       tongCanThu: '10.000.000 ₫',
     },
@@ -1272,7 +1272,7 @@
           <div class="modal-tcell-val">${o.daThu}</div>
         </div>
         <div class="modal-tcell-right">
-          <div class="modal-tcell-lbl">${col3Label}</div>
+          <div class="modal-tcell-lbl">${o.col3 || col3Label}</div>
           <div class="modal-tcell-val">${o.canThu}</div>
         </div>
       </div>`).join('');
@@ -1344,6 +1344,7 @@
   document.getElementById('modal-partial-input').addEventListener('input', function() {
     const raw = this.value.replace(/\D/g, '');
     const num = parseInt(raw, 10);
+    this.value = isNaN(num) ? '' : num.toLocaleString('vi-VN');
     document.getElementById('modal-ghi-nhan').textContent =
       isNaN(num) ? '0 ₫' : num.toLocaleString('vi-VN') + ' ₫';
   });
