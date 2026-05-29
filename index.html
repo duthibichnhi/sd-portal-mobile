@@ -836,7 +836,7 @@
     <div class="map-filter-bar">
       <div class="map-filter-chips">
         <div class="map-chip selected" data-map-filter="Tất cả">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5 L10.5 15.5 L17 9"/></svg>
           Tất cả
         </div>
         <div class="map-chip" data-map-filter="Giao & Thu nợ">Giao &amp; Thu nợ</div>
@@ -1180,10 +1180,12 @@
   function initMap() {
     if (mapInstance) return;
     mapInstance = L.map('leaflet-map', {
-      center: [10.7730, 106.6859], zoom: 14,
+      center: [10.7730, 106.6860], zoom: 15,
       zoomControl: false, attributionControl: false,
     });
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapInstance);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      maxZoom: 19,
+    }).addTo(mapInstance);
 
     MAP_LOCATIONS.forEach(loc => {
       const icon = L.divIcon({
