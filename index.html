@@ -111,6 +111,7 @@
       flex: 1; min-height: 0;
       overflow-y: auto; scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: none;
     }
     .main::-webkit-scrollbar { display: none; }
     .main-inner { display: flex; flex-direction: column; gap: 16px; padding: 12px; }
@@ -238,7 +239,7 @@
     }
     .detail-title { flex: 1; font-size: 18px; font-weight: 500; color: #09090b; line-height: 28px; }
 
-    .detail-main { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 12px; display: flex; flex-direction: column; gap: 24px; }
+    .detail-main { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-y: none; padding: 12px; display: flex; flex-direction: column; gap: 24px; }
     .detail-main::-webkit-scrollbar { display: none; }
 
     /* Customer info row */
@@ -378,7 +379,7 @@
     }
     .sheet-handle { width: 52px; height: 4px; background: var(--slate-200); border-radius: 100px; }
     .sheet-list {
-      flex: 1; overflow-y: auto; scrollbar-width: none;
+      flex: 1; overflow-y: auto; scrollbar-width: none; overscroll-behavior-y: none;
       background: var(--slate-100); display: flex; flex-direction: column; gap: 8px;
     }
     .sheet-list::-webkit-scrollbar { display: none; }
