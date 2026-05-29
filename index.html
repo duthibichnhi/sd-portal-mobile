@@ -191,6 +191,7 @@
     .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; flex-shrink: 0; }
     .badge-status  { background: var(--amber-500); color: white; }
     .badge-blue    { background: var(--blue-badge-bg); color: var(--blue-badge-text); }
+    .badge-done    { background: #3b82f6; color: white; }
 
     /* Amount boxes */
     .amount-box { border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 4px; }
@@ -674,15 +675,15 @@
 
     <nav class="bottom-nav">
       <div class="bottom-nav-inner">
-        <div class="tab-item active">
+        <div class="tab-item active" data-tab="0">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
           <span class="tab-label">Cần thực hiện</span>
         </div>
-        <div class="tab-item">
+        <div class="tab-item" data-tab="1">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="15" x2="16" y2="15"/><line x1="8" y1="11" x2="8.01" y2="11"/><line x1="8" y1="15" x2="8.01" y2="15"/></svg>
           <span class="tab-label">Đơn dự kiến</span>
         </div>
-        <div class="tab-item">
+        <div class="tab-item" data-tab="2">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
           <span class="tab-label">Lịch sử</span>
         </div>
@@ -690,6 +691,125 @@
     </nav>
 
   </div><!-- /screen-list -->
+
+
+  <!-- ══ SCREEN: ĐƠN DỰ KIẾN ══════════════════════════ -->
+  <div class="screen off-right" id="screen-don-du-kien">
+
+    <header class="header">
+      <div class="header-title">Công ty Ngọc Trường Tài</div>
+      <div class="avatar">CN</div>
+    </header>
+
+    <main class="main">
+      <div class="main-inner">
+
+        <h1 class="page-title" style="margin-bottom:0">Đơn dự kiến</h1>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Số NBL</div><div class="stat-value">2</div></div>
+          <div class="stat-card"><div class="stat-label">Số line SP</div><div class="stat-value">5</div></div>
+          <div class="stat-card"><div class="stat-label">Số lượng SP</div><div class="stat-value">5</div></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Filter row — dropdown only -->
+          <div class="filter-row">
+            <div class="filter-left">
+              <div class="dropdown-wrap">
+                <div class="dropdown-trigger" id="ddk-dropdownTrigger">
+                  <span id="ddk-dropdownLabel">Phân loại: Tất cả</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                </div>
+                <div class="dropdown-menu" id="ddk-dropdownMenu">
+                  <div class="dropdown-item selected" data-value="Tất cả">Tất cả</div>
+                  <div class="dropdown-item" data-value="Giao hàng">Giao hàng</div>
+                  <div class="dropdown-item" data-value="Giao & Thu nợ">Giao &amp; Thu nợ</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Cards -->
+          <div class="cards-list">
+
+            <!-- Card 1: cô Mai — Giao hàng -->
+            <div class="task-card">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <span class="card-name">Tạp hoá cô Mai</span>
+                  <span class="badge badge-done">Đã lên đơn</span>
+                </div>
+                <div class="card-desc-row">
+                  <span class="badge badge-blue">Giao hàng</span>
+                  <span class="card-meta">99916243 · W-10000000</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-address">
+                  <div class="card-address-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                  <span class="card-address-text">12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh</span>
+                </div>
+                <div class="amount-box amount-box-grey">
+                  <span class="amount-label">Tiền hàng</span>
+                  <span class="amount-value">7.500.000 ₫</span>
+                </div>
+              </div>
+              <button class="btn-detail">Xem chi tiết</button>
+            </div>
+
+            <!-- Card 2: chợ Cầu — Giao & Thu nợ -->
+            <div class="task-card">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <span class="card-name">Tạp hoá chợ Cầu</span>
+                  <span class="badge badge-done">Đã lên đơn</span>
+                </div>
+                <div class="card-desc-row">
+                  <span class="badge badge-blue">Giao &amp; Thu nợ</span>
+                  <span class="card-meta">99916243 · W-10000000</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-address">
+                  <div class="card-address-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                  <span class="card-address-text">12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh</span>
+                </div>
+                <div class="amount-box amount-box-grey">
+                  <span class="amount-label">Tiền hàng</span>
+                  <span class="amount-value">7.500.000 ₫</span>
+                </div>
+                <div class="amount-box amount-box-yellow">
+                  <span class="amount-label">Nợ cần thu</span>
+                  <span class="amount-value">2.500.000 ₫</span>
+                </div>
+              </div>
+              <button class="btn-detail">Xem chi tiết</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <div class="tab-item" data-tab="0">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg>
+          <span class="tab-label">Cần thực hiện</span>
+        </div>
+        <div class="tab-item active" data-tab="1">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><line x1="12" y1="11" x2="16" y2="11"/><line x1="12" y1="15" x2="16" y2="15"/><line x1="8" y1="11" x2="8.01" y2="11"/><line x1="8" y1="15" x2="8.01" y2="15"/></svg>
+          <span class="tab-label">Đơn dự kiến</span>
+        </div>
+        <div class="tab-item" data-tab="2">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+          <span class="tab-label">Lịch sử</span>
+        </div>
+      </div>
+    </nav>
+
+  </div><!-- /screen-don-du-kien -->
 
 
   <!-- ══ SCREEN: DETAIL — GIAO / GIAO & THU NỢ ════════ -->
@@ -1182,10 +1302,44 @@
   }, { passive: true });
 
   // ── Bottom tabs ─────────────────────────────────────
-  document.querySelectorAll('.tab-item').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
+  const TAB_SCREENS = ['screen-list', 'screen-don-du-kien', null];
+
+  function switchTab(idx) {
+    // Swap tab screens instantly (no slide animation)
+    TAB_SCREENS.forEach((id, i) => {
+      if (!id) return;
+      const el = document.getElementById(id);
+      el.style.transition = 'none';
+      el.classList.remove('active', 'off-right', 'off-left', 'stay');
+      el.classList.add(i === idx ? 'active' : 'off-right');
+      requestAnimationFrame(() => { el.style.transition = ''; });
+    });
+    // Update active state on all tab items
+    document.querySelectorAll('.tab-item[data-tab]').forEach(t => {
+      t.classList.toggle('active', Number(t.dataset.tab) === idx);
+    });
+  }
+
+  document.querySelectorAll('.tab-item[data-tab]').forEach(tab => {
+    tab.addEventListener('click', () => switchTab(Number(tab.dataset.tab)));
+  });
+
+  // ── Đơn dự kiến dropdown ────────────────────────────
+  const ddkTrigger = document.getElementById('ddk-dropdownTrigger');
+  const ddkMenu    = document.getElementById('ddk-dropdownMenu');
+  const ddkLabel   = document.getElementById('ddk-dropdownLabel');
+  ddkTrigger.addEventListener('click', e => {
+    e.stopPropagation();
+    const open = ddkMenu.classList.toggle('open');
+    ddkTrigger.classList.toggle('open', open);
+  });
+  ddkMenu.querySelectorAll('.dropdown-item').forEach(item => {
+    item.addEventListener('click', () => {
+      ddkMenu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
+      item.classList.add('selected');
+      ddkLabel.textContent = 'Phân loại: ' + item.dataset.value;
+      ddkMenu.classList.remove('open');
+      ddkTrigger.classList.remove('open');
     });
   });
 
