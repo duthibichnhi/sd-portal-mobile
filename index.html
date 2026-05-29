@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Cần thực hiện</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html, body {
-      height: 100%;
-      overflow: hidden;
-    }
+    html, body { height: 100%; overflow: hidden; }
 
     :root {
       --white: #ffffff;
@@ -24,14 +21,19 @@
       --slate-900: #0f172a;
       --slate-500: #64748b;
       --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
       --slate-200: #e2e8f0;
+      --slate-300: #cbd5e1;
       --blue-600: #2563eb;
       --amber-500: #f59e0b;
       --blue-badge-bg: #eff6ff;
       --blue-badge-text: #3b82f6;
       --warning-bg: #fffbeb;
-      --text-foreground: #09090b;
+      --text-fg: #09090b;
       --muted: #64748b;
+      --azure: #65758b;
+      --destructive-bg: rgba(220,38,38,0.1);
+      --destructive: #dc2626;
     }
 
     body {
@@ -45,13 +47,29 @@
     .phone {
       width: 390px;
       height: 100%;
-      display: flex;
-      flex-direction: column;
+      position: relative;
       overflow: hidden;
       background: var(--bg-page);
     }
 
-    /* ── HEADER — in flex flow, hides via margin-top ─── */
+    /* ── SCREENS ─────────────────────────────────────── */
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-page);
+      transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .screen.off-right  { transform: translateX(100%); }
+    .screen.off-left   { transform: translateX(-30%); }
+    .screen.active     { transform: translateX(0); }
+
+    /* ════════════════════════════════════════════════════
+       LIST SCREEN
+    ════════════════════════════════════════════════════ */
+    /* HEADER */
     .header {
       flex-shrink: 0;
       height: 64px;
@@ -62,13 +80,9 @@
       gap: 8px;
       padding: 0 12px;
       transition: margin-top 0.28s ease;
-      position: relative;
       z-index: 2;
     }
-
-    .header.hidden {
-      margin-top: -64px;
-    }
+    .header.hidden { margin-top: -64px; }
 
     .header-title {
       flex: 1;
@@ -81,596 +95,724 @@
     }
 
     .avatar {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       border-radius: 50%;
       background: var(--blue-600);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      color: white;
-      letter-spacing: 0.12px;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; color: white;
+      letter-spacing: 0.12px; flex-shrink: 0;
     }
 
-    /* ── MAIN — flex:1 + min-height:0 makes it scroll ── */
+    /* MAIN */
     .main {
-      flex: 1;
-      min-height: 0;
-      overflow-y: auto;
-      scrollbar-width: none;
+      flex: 1; min-height: 0;
+      overflow-y: auto; scrollbar-width: none;
       -webkit-overflow-scrolling: touch;
     }
     .main::-webkit-scrollbar { display: none; }
+    .main-inner { display: flex; flex-direction: column; gap: 16px; padding: 12px; }
 
-    .main-inner {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      padding: 12px;
-    }
+    /* Page header */
+    .page-header { display: flex; align-items: center; gap: 10px; }
+    .page-title { flex: 1; font-size: 20px; font-weight: 600; color: #18181b; letter-spacing: -0.6px; line-height: 28px; }
 
-    /* ── PAGE HEADER ─────────────────────────────────── */
-    .page-header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .page-title {
-      flex: 1;
-      font-size: 20px;
-      font-weight: 600;
-      color: #18181b;
-      letter-spacing: -0.6px;
-      line-height: 28px;
-    }
-
-    .btn-primary {
-      height: 40px;
-      padding: 0 16px;
-      background: var(--primary);
-      color: var(--primary-fg);
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .btn-primary:active { opacity: 0.85; }
-
-    /* ── STAT CARDS ──────────────────────────────────── */
-    .stats-row {
-      display: flex;
-      gap: 8px;
-    }
-
+    /* Stats */
+    .stats-row { display: flex; gap: 8px; }
     .stat-card {
-      flex: 1;
-      background: white;
-      border: 1px solid var(--border-card);
-      border-radius: 10px;
-      padding: 8px;
-      box-shadow: 0 1px 2px rgba(26,26,26,0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
+      flex: 1; background: white;
+      border: 1px solid var(--border-card); border-radius: 10px;
+      padding: 8px; box-shadow: 0 1px 2px rgba(26,26,26,0.05);
+      display: flex; flex-direction: column; gap: 8px;
     }
+    .stat-label { font-size: 12px; font-weight: 500; color: var(--slate-500); line-height: 16px; }
+    .stat-value { font-size: 14px; font-weight: 600; color: var(--slate-900); line-height: 1; }
 
-    .stat-label {
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--slate-500);
-      line-height: 16px;
-    }
-
-    .stat-value {
-      font-size: 14px;
-      font-weight: 600;
-      color: var(--slate-900);
-      line-height: 1;
-    }
-
-    /* ── FILTER ROW ──────────────────────────────────── */
-    .filter-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
+    /* Filter */
+    .filter-row { display: flex; align-items: center; gap: 8px; }
     .filter-left { flex: 1; }
 
-    .dropdown-wrap {
-      position: relative;
-      display: inline-flex;
-    }
-
+    .dropdown-wrap { position: relative; display: inline-flex; }
     .dropdown-trigger {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      height: 36px;
-      padding: 0 16px;
-      background: white;
-      border: 1px solid var(--slate-200);
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--slate-900);
-      cursor: pointer;
-      white-space: nowrap;
-      user-select: none;
+      display: inline-flex; align-items: center; gap: 8px;
+      height: 36px; padding: 0 16px;
+      background: white; border: 1px solid var(--slate-200); border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: var(--slate-900);
+      cursor: pointer; white-space: nowrap; user-select: none;
     }
-
-    .dropdown-trigger .chevron {
-      transition: transform 0.2s ease;
-    }
-    .dropdown-trigger.open .chevron {
-      transform: rotate(180deg);
-    }
+    .dropdown-trigger .chevron { transition: transform 0.2s ease; }
+    .dropdown-trigger.open .chevron { transform: rotate(180deg); }
 
     .dropdown-menu {
-      display: none;
-      position: absolute;
-      top: calc(100% + 4px);
-      left: 0;
-      min-width: 160px;
-      background: white;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
+      display: none; position: absolute;
+      top: calc(100% + 4px); left: 0;
+      min-width: 160px; background: white;
+      border: 1px solid #cbd5e1; border-radius: 6px;
       box-shadow: 0 2px 4px -2px rgba(26,26,26,0.05), 0 4px 6px -1px rgba(26,26,26,0.05);
-      z-index: 50;
-      overflow: hidden;
-      padding: 4px;
+      z-index: 50; overflow: hidden; padding: 4px;
     }
-
-    .dropdown-menu.open {
-      display: block;
-    }
-
+    .dropdown-menu.open { display: block; }
     .dropdown-item {
-      display: flex;
-      align-items: center;
-      padding: 6px 8px;
-      border-radius: 6px;
-      font-size: 14px;
-      font-weight: 400;
-      color: #09090b;
-      cursor: pointer;
-      white-space: nowrap;
+      display: flex; align-items: center; padding: 6px 8px;
+      border-radius: 6px; font-size: 14px; font-weight: 400; color: #09090b;
+      cursor: pointer; white-space: nowrap;
     }
-
-    .dropdown-item:hover,
-    .dropdown-item.selected {
-      background: #f1f5f9;
-      color: #18181b;
-    }
+    .dropdown-item:hover, .dropdown-item.selected { background: #f1f5f9; color: #18181b; }
 
     .btn-secondary {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      height: 36px;
-      padding: 0 10px;
-      background: var(--slate-100);
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--slate-900);
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-    .btn-secondary:active { opacity: 0.8; }
-
-    /* ── TASK CARDS ──────────────────────────────────── */
-    .cards-list {
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      display: inline-flex; align-items: center; gap: 6px;
+      height: 36px; padding: 0 10px;
+      background: var(--slate-100); border: none; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: var(--slate-900);
+      font-family: 'Inter', sans-serif; cursor: pointer; white-space: nowrap; flex-shrink: 0;
     }
 
+    /* Task cards */
+    .cards-list { display: flex; flex-direction: column; gap: 16px; }
     .task-card {
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 17px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
+      background: white; border: 1px solid var(--border); border-radius: 10px;
+      padding: 17px; display: flex; flex-direction: column; gap: 16px;
       box-shadow: 0 1px 1px rgba(0,0,0,0.05);
     }
-
     .card-header { display: flex; flex-direction: column; gap: 4px; }
-
-    .card-title-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .card-name {
-      flex: 1;
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--slate-900);
-      line-height: 24px;
-      min-width: 0;
-    }
-
-    .card-desc-row {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .card-meta {
-      font-size: 12px;
-      color: var(--slate-500);
-      line-height: 16px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      padding: 2px 8px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      line-height: 16px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    .badge-status { background: var(--amber-500); color: white; }
-    .badge-blue   { background: var(--blue-badge-bg); color: var(--blue-badge-text); }
-
+    .card-title-row { display: flex; align-items: center; gap: 4px; }
+    .card-name { flex: 1; font-size: 16px; font-weight: 600; color: var(--slate-900); line-height: 24px; min-width: 0; }
+    .card-desc-row { display: flex; align-items: center; gap: 4px; }
+    .card-meta { font-size: 12px; color: var(--slate-500); line-height: 16px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .card-body { display: flex; flex-direction: column; gap: 8px; }
+    .card-address { display: flex; align-items: flex-start; gap: 6px; }
+    .card-address-icon { flex-shrink: 0; width: 14px; height: 16px; display: flex; align-items: center; justify-content: center; }
+    .card-address-text { font-size: 12px; color: var(--muted); line-height: 16px; letter-spacing: 0.12px; }
 
-    .card-address {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-    }
+    /* Badges */
+    .badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 500; line-height: 16px; white-space: nowrap; flex-shrink: 0; }
+    .badge-status  { background: var(--amber-500); color: white; }
+    .badge-blue    { background: var(--blue-badge-bg); color: var(--blue-badge-text); }
 
-    .card-address-icon {
-      flex-shrink: 0;
-      width: 14px;
-      height: 16px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .card-address-text {
-      font-size: 12px;
-      color: var(--muted);
-      line-height: 16px;
-      letter-spacing: 0.12px;
-    }
-
-    .amount-box {
-      border-radius: 8px;
-      padding: 8px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
+    /* Amount boxes */
+    .amount-box { border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 4px; }
     .amount-box-grey   { background: var(--slate-100); }
     .amount-box-yellow { background: var(--warning-bg); }
+    .amount-label { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-fg); white-space: nowrap; }
+    .amount-value { font-size: 14px; font-weight: 500; color: var(--text-fg); white-space: nowrap; }
 
-    .amount-label {
-      flex: 1;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--text-foreground);
-      white-space: nowrap;
+    /* Buttons */
+    .btn-primary {
+      height: 40px; padding: 0 16px;
+      background: var(--primary); color: var(--primary-fg);
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer; white-space: nowrap;
+      flex-shrink: 0; display: flex; align-items: center; gap: 8px;
     }
-
-    .amount-value {
-      font-size: 14px;
-      font-weight: 500;
-      color: var(--text-foreground);
-      white-space: nowrap;
-    }
-
+    .btn-primary:active { opacity: 0.85; }
     .btn-detail {
-      width: 100%;
-      height: 40px;
-      background: var(--primary);
-      color: var(--primary-fg);
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      cursor: pointer;
+      width: 100%; height: 40px; background: var(--primary); color: var(--primary-fg);
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
     }
     .btn-detail:active { opacity: 0.85; }
 
-    /* ── BOTTOM NAV — in flex flow, fixed at bottom ──── */
-    .bottom-nav {
-      flex-shrink: 0;
-      background: var(--white);
-      box-shadow: 0 -1px 2px rgba(26,26,26,0.05);
-      padding-bottom: env(safe-area-inset-bottom, 21px);
-    }
-
-    .bottom-nav-inner {
-      display: flex;
-      align-items: center;
-      height: 60px;
-      padding: 8px 0;
-    }
-
-    .tab-item {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 2px 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      min-width: 56px;
-    }
-
+    /* Bottom nav */
+    .bottom-nav { flex-shrink: 0; background: var(--white); box-shadow: 0 -1px 2px rgba(26,26,26,0.05); padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .bottom-nav-inner { display: flex; align-items: center; height: 60px; padding: 8px 0; }
+    .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; padding: 2px 8px; border-radius: 6px; cursor: pointer; min-width: 56px; }
     .tab-item svg { width: 16px; height: 16px; }
-
-    .tab-label {
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--muted);
-      line-height: 1;
-      white-space: nowrap;
-      text-align: center;
-    }
-
+    .tab-label { font-size: 12px; font-weight: 400; color: var(--muted); line-height: 1; white-space: nowrap; text-align: center; }
     .tab-item.active .tab-label { font-weight: 500; color: var(--blue-600); }
     .tab-item.active svg        { color: var(--blue-600); }
     .tab-item:not(.active) svg  { color: var(--muted); }
+
+    /* ════════════════════════════════════════════════════
+       DETAIL SCREENS (shared)
+    ════════════════════════════════════════════════════ */
+    .detail-header {
+      flex-shrink: 0; height: 64px;
+      background: var(--white); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 12px; gap: 4px;
+    }
+    .detail-close {
+      display: flex; align-items: center; justify-content: center;
+      width: 24px; height: 24px; cursor: pointer; flex-shrink: 0; border: none; background: none; padding: 4px;
+    }
+    .detail-title { flex: 1; font-size: 18px; font-weight: 500; color: #09090b; line-height: 28px; }
+
+    .detail-main { flex: 1; min-height: 0; overflow-y: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch; padding: 12px; display: flex; flex-direction: column; gap: 24px; }
+    .detail-main::-webkit-scrollbar { display: none; }
+
+    /* Customer info row */
+    .cust-row { display: flex; align-items: flex-start; gap: 16px; }
+    .cust-info { flex: 1; min-width: 0; }
+    .cust-name { font-size: 18px; font-weight: 600; color: var(--slate-900); line-height: 28px; }
+    .cust-meta { font-size: 12px; color: var(--slate-500); line-height: 16px; margin-top: 2px; }
+
+    /* Address section */
+    .addr-section { display: flex; flex-direction: column; gap: 12px; }
+    .addr-row { display: flex; align-items: center; gap: 6px; }
+    .addr-icon { flex-shrink: 0; width: 14px; display: flex; align-items: center; }
+    .addr-text { font-size: 12px; color: var(--muted); line-height: 16px; letter-spacing: 0.12px; }
+
+    .btn-nav {
+      height: 32px; width: 100%;
+      background: white; border: 1px solid var(--slate-300); border-radius: 8px;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      font-size: 14px; font-weight: 500; color: var(--text-fg);
+      cursor: pointer; font-family: 'Inter', sans-serif;
+    }
+
+    /* Credit box */
+    .credit-box {
+      background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 10px;
+      padding: 17px; display: flex; gap: 4px;
+    }
+    .credit-col { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .credit-label { font-size: 12px; font-weight: 400; color: var(--azure); line-height: 16px; letter-spacing: 0.12px; }
+    .credit-value { font-size: 14px; font-weight: 600; color: var(--text-fg); line-height: 20px; }
+
+    /* Section title */
+    .section-title { font-size: 16px; font-weight: 600; color: var(--slate-900); line-height: 24px; }
+
+    /* Order summary box */
+    .order-summary {
+      background: var(--slate-50); border: 1px solid var(--slate-200); border-radius: 10px;
+      padding: 17px; display: flex; flex-direction: column; gap: 12px;
+    }
+    .order-row { display: flex; gap: 8px; }
+    .order-col { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .order-lbl { font-size: 12px; font-weight: 400; color: var(--muted); line-height: 16px; letter-spacing: 0.12px; }
+    .order-val { font-size: 14px; font-weight: 500; color: var(--slate-900); line-height: 20px; }
+
+    /* Product table */
+    .product-table {
+      background: white; border: 1px solid var(--slate-200); border-radius: 8px;
+      overflow: hidden;
+    }
+    .table-header {
+      background: var(--slate-50); border-bottom: 1px solid #e4e4e7;
+      padding: 0 8px; height: 40px; display: flex; align-items: center;
+    }
+    .table-header-text { font-size: 14px; font-weight: 500; color: var(--slate-500); }
+    .table-row { display: flex; border-bottom: 1px solid #e4e4e7; }
+    .table-row:last-child { border-bottom: none; }
+    .table-cell-main { flex: 1; min-width: 0; padding: 8px; display: flex; flex-direction: column; gap: 4px; height: 56px; justify-content: center; }
+    .table-cell-sl    { width: 80px; padding: 8px; display: flex; flex-direction: column; gap: 4px; height: 56px; justify-content: center; align-items: flex-end; }
+    .table-cell-amt   { width: 112px; padding: 8px; display: flex; flex-direction: column; gap: 4px; height: 56px; justify-content: center; align-items: flex-end; }
+    .tbl-name { font-size: 14px; font-weight: 500; color: var(--text-fg); line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tbl-sku  { font-size: 14px; font-weight: 400; color: var(--slate-500); line-height: 20px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tbl-hdr  { font-size: 14px; font-weight: 400; color: var(--muted); line-height: 1; white-space: nowrap; text-align: right; }
+    .tbl-val  { font-size: 14px; font-weight: 400; color: var(--text-fg); line-height: 20px; white-space: nowrap; text-align: right; }
+
+    /* Total rows */
+    .total-no { background: var(--warning-bg); border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 4px; }
+    .total-grand { background: var(--slate-100); border-radius: 8px; padding: 8px; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+    .total-lbl  { flex: 1; font-size: 12px; font-weight: 500; color: var(--text-fg); white-space: nowrap; }
+    .total-val  { font-size: 14px; font-weight: 500; color: var(--text-fg); white-space: nowrap; }
+    .total-val.bold { font-weight: 700; }
+    .total-val.right { text-align: right; flex: 1; }
+
+    /* Detail bottom */
+    .detail-bottom {
+      flex-shrink: 0; background: white;
+      box-shadow: 0 -1px 2px rgba(26,26,26,0.05);
+      padding: 12px 16px; display: flex; flex-direction: column; gap: 12px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom, 12px));
+    }
+    .btn-confirm {
+      width: 100%; height: 40px; background: var(--primary); color: var(--primary-fg);
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+    .btn-confirm:active { opacity: 0.85; }
+    .btn-danger {
+      width: 100%; height: 40px; background: var(--destructive-bg); color: var(--destructive);
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+    .btn-cancel {
+      width: 100%; height: 40px; background: white; color: var(--text-fg);
+      border: 1px solid var(--slate-300); border-radius: 8px; font-size: 14px; font-weight: 500;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+      box-shadow: 0 1px 1px rgba(26,26,26,0.05);
+    }
   </style>
 </head>
 <body>
-
 <div class="phone">
 
-  <!-- HEADER -->
-  <header class="header" id="header">
-    <div class="header-title">Công ty Ngọc Trường Tài</div>
-    <div class="avatar">CN</div>
-  </header>
+  <!-- ══ SCREEN: LIST ══════════════════════════════════ -->
+  <div class="screen active" id="screen-list">
 
-  <!-- MAIN CONTENT -->
-  <main class="main" id="main">
-    <div class="main-inner">
+    <header class="header" id="header">
+      <div class="header-title">Công ty Ngọc Trường Tài</div>
+      <div class="avatar">CN</div>
+    </header>
 
-      <!-- Page header -->
-      <div class="page-header">
-        <h1 class="page-title">Cần thực hiện</h1>
-        <button class="btn-primary">Tạo phiếu thu</button>
+    <main class="main" id="main">
+      <div class="main-inner">
+
+        <div class="page-header">
+          <h1 class="page-title">Cần thực hiện</h1>
+          <button class="btn-primary">Tạo phiếu thu</button>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-label">Số NBL</div><div class="stat-value">3</div></div>
+          <div class="stat-card"><div class="stat-label">Số line SP</div><div class="stat-value">5</div></div>
+          <div class="stat-card"><div class="stat-label">Số lượng SP</div><div class="stat-value">5</div></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <!-- Filter row -->
+          <div class="filter-row">
+            <div class="filter-left">
+              <div class="dropdown-wrap">
+                <div class="dropdown-trigger" id="dropdownTrigger">
+                  <span id="dropdownLabel">Phân loại: Tất cả</span>
+                  <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M4 6L8 10L12 6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </div>
+                <div class="dropdown-menu" id="dropdownMenu">
+                  <div class="dropdown-item selected" data-value="Tất cả">Tất cả</div>
+                  <div class="dropdown-item" data-value="Giao hàng">Giao hàng</div>
+                  <div class="dropdown-item" data-value="Giao & Thu nợ">Giao &amp; Thu nợ</div>
+                  <div class="dropdown-item" data-value="Thu nợ">Thu nợ</div>
+                </div>
+              </div>
+            </div>
+            <button class="btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                <line x1="9" y1="3" x2="9" y2="18"/>
+                <line x1="15" y1="6" x2="15" y2="21"/>
+              </svg>
+              Xem bản đồ
+            </button>
+          </div>
+
+          <!-- Cards -->
+          <div class="cards-list">
+
+            <!-- Card 1: cô Thu — Giao hàng -->
+            <div class="task-card" data-type="Giao hàng" data-card="co-thu">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <span class="card-name">Tạp hoá cô Thu</span>
+                  <span class="badge badge-status">Cần thực hiện</span>
+                </div>
+                <div class="card-desc-row">
+                  <span class="badge badge-blue">Giao hàng</span>
+                  <span class="card-meta">99916243 · W-10000000</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-address">
+                  <div class="card-address-icon"><!-- pin --><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                  <span class="card-address-text">12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh</span>
+                </div>
+                <div class="amount-box amount-box-grey">
+                  <span class="amount-label">Tiền hàng</span>
+                  <span class="amount-value">7.500.000 ₫</span>
+                </div>
+              </div>
+              <button class="btn-detail" data-card="co-thu">Xem chi tiết</button>
+            </div>
+
+            <!-- Card 2: chú Chín — Giao & Thu nợ -->
+            <div class="task-card" data-type="Giao & Thu nợ" data-card="chu-chin">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <span class="card-name">Tạp hoá chú Chín</span>
+                  <span class="badge badge-status">Cần thực hiện</span>
+                </div>
+                <div class="card-desc-row">
+                  <span class="badge badge-blue">Giao &amp; Thu nợ</span>
+                  <span class="card-meta">99916243 · W-10000000</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-address">
+                  <div class="card-address-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                  <span class="card-address-text">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
+                </div>
+                <div class="amount-box amount-box-grey">
+                  <span class="amount-label">Tiền hàng</span>
+                  <span class="amount-value">7.500.000 ₫</span>
+                </div>
+                <div class="amount-box amount-box-yellow">
+                  <span class="amount-label">Nợ cần thu</span>
+                  <span class="amount-value">2.500.000 ₫</span>
+                </div>
+              </div>
+              <button class="btn-detail" data-card="chu-chin">Xem chi tiết</button>
+            </div>
+
+            <!-- Card 3: Sáu Nở — Thu nợ -->
+            <div class="task-card" data-type="Thu nợ" data-card="sau-no">
+              <div class="card-header">
+                <div class="card-title-row">
+                  <span class="card-name">Tạp hoá Sáu Nở</span>
+                  <span class="badge badge-status">Cần thực hiện</span>
+                </div>
+                <div class="card-desc-row">
+                  <span class="badge badge-blue">Thu nợ</span>
+                  <span class="card-meta">99916243 · W-10000000</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="card-address">
+                  <div class="card-address-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+                  <span class="card-address-text">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
+                </div>
+                <div class="amount-box amount-box-yellow">
+                  <span class="amount-label">Nợ cần thu</span>
+                  <span class="amount-value">2.500.000 ₫</span>
+                </div>
+              </div>
+              <button class="btn-detail" data-card="sau-no">Xem chi tiết</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <nav class="bottom-nav">
+      <div class="bottom-nav-inner">
+        <div class="tab-item active">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 14l2 2 4-4"/></svg>
+          <span class="tab-label">Cần thực hiện</span>
+        </div>
+        <div class="tab-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="9" x2="15" y2="9"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="12" y2="17"/></svg>
+          <span class="tab-label">Đơn dự kiến</span>
+        </div>
+        <div class="tab-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.5"/><polyline points="12 7 12 12 15 15"/></svg>
+          <span class="tab-label">Lịch sử</span>
+        </div>
+      </div>
+    </nav>
+
+  </div><!-- /screen-list -->
+
+
+  <!-- ══ SCREEN: DETAIL — GIAO / GIAO & THU NỢ ════════ -->
+  <div class="screen off-right" id="screen-detail-giao">
+
+    <div class="detail-header">
+      <button class="detail-close" id="close-giao">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <span class="detail-title" id="giao-title">Đơn giao W-10000000 &amp; Thu nợ</span>
+    </div>
+
+    <div class="detail-main">
+
+      <!-- Customer -->
+      <div class="cust-row">
+        <div class="cust-info">
+          <div class="cust-name" id="giao-name">Tạp hoá chú Chín</div>
+          <div class="cust-meta" id="giao-meta">99916243 · W-10000000</div>
+        </div>
+        <span class="badge badge-status">Cần thực hiện</span>
       </div>
 
-      <!-- Stats -->
-      <div class="stats-row">
-        <div class="stat-card">
-          <div class="stat-label">Số NBL</div>
-          <div class="stat-value">3</div>
+      <!-- Address + nav -->
+      <div class="addr-section">
+        <div class="addr-row">
+          <div class="addr-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <span class="addr-text" id="giao-address">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Số line SP</div>
-          <div class="stat-value">5</div>
+        <div class="addr-row">
+          <div class="addr-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9.13 19.79 19.79 0 0 1 1.61 0.5a2 2 0 0 1 1.99-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 5.95a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.5 13.28z"/></svg></div>
+          <span class="addr-text" id="giao-phone">0898455860</span>
         </div>
-        <div class="stat-card">
-          <div class="stat-label">Số lượng SP</div>
-          <div class="stat-value">5</div>
+        <button class="btn-nav">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Dẫn đường
+        </button>
+      </div>
+
+      <!-- Credit -->
+      <div class="credit-box">
+        <div class="credit-col">
+          <div class="credit-label">Hạn mức cấp</div>
+          <div class="credit-value">50.000.000 ₫</div>
+        </div>
+        <div class="credit-col">
+          <div class="credit-label">Hạn mức còn lại</div>
+          <div class="credit-value">5.500.000 ₫</div>
         </div>
       </div>
 
-      <!-- Filter + cards -->
-      <div style="display:flex;flex-direction:column;gap:16px;">
+      <!-- Order info -->
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        <div class="section-title">Thông tin đơn hàng</div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="order-summary">
+            <div class="order-row">
+              <div class="order-col"><div class="order-lbl">Số lượng SP</div><div class="order-val" id="giao-sl">3</div></div>
+              <div class="order-col"><div class="order-lbl">Số line SP</div><div class="order-val" id="giao-line">3</div></div>
+            </div>
+            <div class="order-row">
+              <div class="order-col"><div class="order-lbl">Khối lượng SP</div><div class="order-val" id="giao-weight">6.6 kg</div></div>
+              <div class="order-col"><div class="order-lbl">Giá trị đơn</div><div class="order-val" id="giao-order-val">3.500.000 ₫</div></div>
+            </div>
+          </div>
 
-        <!-- Filter row -->
-        <div class="filter-row">
-          <div class="filter-left">
-            <div class="dropdown-wrap">
-              <div class="dropdown-trigger" id="dropdownTrigger">
-                <span id="dropdownLabel">Phân loại: Tất cả</span>
-                <svg class="chevron" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M4 6L8 10L12 6" stroke="#0f172a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+          <!-- Product table -->
+          <div class="product-table">
+            <div class="table-header"><span class="table-header-text" id="giao-table-title">Chi tiết đơn hàng (2)</span></div>
+            <div id="giao-products">
+              <div class="table-row">
+                <div class="table-cell-main"><div class="tbl-name">Nước nắm Chinsu 365</div><div class="tbl-sku">SP 001 · 2.4kg/thùng</div></div>
+                <div class="table-cell-sl"><div class="tbl-hdr">SL</div><div class="tbl-val">2 thùng</div></div>
+                <div class="table-cell-amt"><div class="tbl-hdr">Thành tiền</div><div class="tbl-val">3.000.000 ₫</div></div>
               </div>
-              <div class="dropdown-menu" id="dropdownMenu">
-                <div class="dropdown-item selected" data-value="Tất cả">Tất cả</div>
-                <div class="dropdown-item" data-value="Giao hàng">Giao hàng</div>
-                <div class="dropdown-item" data-value="Giao &amp; Thu nợ">Giao &amp; Thu nợ</div>
-                <div class="dropdown-item" data-value="Thu nợ">Thu nợ</div>
+              <div class="table-row">
+                <div class="table-cell-main"><div class="tbl-name">Wakeup 247</div><div class="tbl-sku">SP 003 · 2.4kg/lốc</div></div>
+                <div class="table-cell-sl"><div class="tbl-hdr">SL</div><div class="tbl-val">2 lốc</div></div>
+                <div class="table-cell-amt"><div class="tbl-hdr">Thành tiền</div><div class="tbl-val">500.000 ₫</div></div>
               </div>
             </div>
           </div>
-          <button class="btn-secondary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-              <line x1="9" y1="3" x2="9" y2="18"/>
-              <line x1="15" y1="6" x2="15" y2="21"/>
-            </svg>
-            Xem bản đồ
-          </button>
         </div>
+      </div>
 
-        <!-- Cards list -->
-        <div class="cards-list">
+      <!-- Nợ cần thu (chỉ hiển thị cho Giao & Thu nợ) -->
+      <div class="total-no" id="giao-no-row" style="display:none;">
+        <span class="total-lbl">Nợ cần thu</span>
+        <span class="total-val right" id="giao-no-val">2.500.000 ₫</span>
+      </div>
 
-          <!-- Card 1 -->
-          <div class="task-card" data-type="Giao hàng">
-            <div class="card-header">
-              <div class="card-title-row">
-                <span class="card-name">Tạp hoá cô Thu</span>
-                <span class="badge badge-status">Cần thực hiện</span>
-              </div>
-              <div class="card-desc-row">
-                <span class="badge badge-blue">Giao hàng</span>
-                <span class="card-meta">99916243 · W-10000000</span>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="card-address">
-                <div class="card-address-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <span class="card-address-text">12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh</span>
-              </div>
-              <div class="amount-box amount-box-grey">
-                <span class="amount-label">Tiền hàng</span>
-                <span class="amount-value">7.500.000 ₫</span>
-              </div>
-            </div>
-            <button class="btn-detail">Xem chi tiết</button>
-          </div>
-
-          <!-- Card 2 -->
-          <div class="task-card" data-type="Giao & Thu nợ">
-            <div class="card-header">
-              <div class="card-title-row">
-                <span class="card-name">Tạp hoá chú Chín</span>
-                <span class="badge badge-status">Cần thực hiện</span>
-              </div>
-              <div class="card-desc-row">
-                <span class="badge badge-blue">Giao &amp; Thu nợ</span>
-                <span class="card-meta">99916243 · W-10000000</span>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="card-address">
-                <div class="card-address-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <span class="card-address-text">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
-              </div>
-              <div class="amount-box amount-box-grey">
-                <span class="amount-label">Tiền hàng</span>
-                <span class="amount-value">7.500.000 ₫</span>
-              </div>
-              <div class="amount-box amount-box-yellow">
-                <span class="amount-label">Nợ cần thu</span>
-                <span class="amount-value">2.500.000 ₫</span>
-              </div>
-            </div>
-            <button class="btn-detail">Xem chi tiết</button>
-          </div>
-
-          <!-- Card 3 -->
-          <div class="task-card" data-type="Thu nợ">
-            <div class="card-header">
-              <div class="card-title-row">
-                <span class="card-name">Tạp hoá Sáu Nở</span>
-                <span class="badge badge-status">Cần thực hiện</span>
-              </div>
-              <div class="card-desc-row">
-                <span class="badge badge-blue">Thu nợ</span>
-                <span class="card-meta">99916243 · W-10000000</span>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="card-address">
-                <div class="card-address-icon">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/>
-                    <circle cx="12" cy="10" r="3"/>
-                  </svg>
-                </div>
-                <span class="card-address-text">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
-              </div>
-              <div class="amount-box amount-box-yellow">
-                <span class="amount-label">Nợ cần thu</span>
-                <span class="amount-value">2.500.000 ₫</span>
-              </div>
-            </div>
-            <button class="btn-detail">Xem chi tiết</button>
-          </div>
-
-        </div>
+      <!-- Tổng cần thu -->
+      <div class="total-grand">
+        <span class="total-lbl">Tổng cần thu</span>
+        <span class="total-val bold" id="giao-total">7.500.000 ₫</span>
       </div>
 
     </div>
-  </main>
 
-  <!-- BOTTOM NAV -->
-  <nav class="bottom-nav">
-    <div class="bottom-nav-inner">
+    <div class="detail-bottom">
+      <button class="btn-confirm" id="giao-btn-confirm">Thu tiền và xác nhận giao</button>
+      <button class="btn-danger">Giao thất bại</button>
+    </div>
 
-      <div class="tab-item active">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
-          <rect x="9" y="3" width="6" height="4" rx="1"/>
-          <path d="M9 14l2 2 4-4"/>
-        </svg>
-        <span class="tab-label">Cần thực hiện</span>
+  </div><!-- /screen-detail-giao -->
+
+
+  <!-- ══ SCREEN: DETAIL — THU NỢ ═══════════════════════ -->
+  <div class="screen off-right" id="screen-detail-thu-no">
+
+    <div class="detail-header">
+      <button class="detail-close" id="close-thu-no">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#09090b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <span class="detail-title">Thu nợ</span>
+    </div>
+
+    <div class="detail-main">
+
+      <!-- Customer -->
+      <div class="cust-row">
+        <div class="cust-info">
+          <div class="cust-name" id="thuno-name">Tạp hoá Sáu Nở</div>
+          <div class="cust-meta" id="thuno-meta">99916243 · W-10000000</div>
+        </div>
+        <span class="badge badge-status">Cần thực hiện</span>
       </div>
 
-      <div class="tab-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="2" width="14" height="20" rx="2"/>
-          <line x1="9" y1="9" x2="15" y2="9"/>
-          <line x1="9" y1="13" x2="15" y2="13"/>
-          <line x1="9" y1="17" x2="12" y2="17"/>
-        </svg>
-        <span class="tab-label">Đơn dự kiến</span>
+      <!-- Address + nav -->
+      <div class="addr-section">
+        <div class="addr-row">
+          <div class="addr-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <span class="addr-text" id="thuno-address">33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh</span>
+        </div>
+        <div class="addr-row">
+          <div class="addr-icon"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15.05 5A5 5 0 0 1 19 8.95M15.05 1A9 9 0 0 1 23 8.94m-1 7.98v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 9.13 19.79 19.79 0 0 1 1.61 0.5a2 2 0 0 1 1.99-2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 5.95a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.5 13.28z"/></svg></div>
+          <span class="addr-text" id="thuno-phone">0898455860</span>
+        </div>
+        <button class="btn-nav">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Dẫn đường
+        </button>
       </div>
 
-      <div class="tab-item">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"/>
-          <path d="M3.51 15a9 9 0 1 0 .49-4.5"/>
-          <polyline points="12 7 12 12 15 15"/>
-        </svg>
-        <span class="tab-label">Lịch sử</span>
+      <!-- Credit -->
+      <div class="credit-box">
+        <div class="credit-col">
+          <div class="credit-label">Hạn mức cấp</div>
+          <div class="credit-value">50.000.000 ₫</div>
+        </div>
+        <div class="credit-col">
+          <div class="credit-label">Hạn mức còn lại</div>
+          <div class="credit-value">5.500.000 ₫</div>
+        </div>
+      </div>
+
+      <!-- Nợ cần thu -->
+      <div class="total-no">
+        <span class="total-lbl">Nợ cần thu</span>
+        <span class="total-val right" id="thuno-no-val">2.500.000 ₫</span>
       </div>
 
     </div>
-  </nav>
 
-</div>
+    <div class="detail-bottom">
+      <button class="btn-confirm">Thu tiền</button>
+      <button class="btn-cancel">Huỷ</button>
+    </div>
+
+  </div><!-- /screen-detail-thu-no -->
+
+</div><!-- /phone -->
 
 <script>
+  // ── Card data ──────────────────────────────────────
+  const CARDS = {
+    'co-thu': {
+      screen: 'giao',
+      title: 'Đơn giao hàng W-10000000',
+      name: 'Tạp hoá cô Thu',
+      meta: '99916243 · W-10000000',
+      address: '12 Nguyễn Trãi, Phường Bến Thành, TP. Hồ Chí Minh',
+      phone: '0898455860',
+      sl: '3', line: '3', weight: '6.6 kg', orderVal: '3.500.000 ₫',
+      products: [
+        { name: 'Nước nắm Chinsu 365', sku: 'SP 001 · 2.4kg/thùng', sl: '2 thùng', amt: '3.000.000 ₫' },
+        { name: 'Wakeup 247',          sku: 'SP 003 · 2.4kg/lốc',  sl: '2 lốc',   amt: '500.000 ₫' },
+      ],
+      hasNo: false,
+      noVal: '',
+      total: '7.500.000 ₫',
+      confirmBtn: 'Xác nhận giao',
+    },
+    'chu-chin': {
+      screen: 'giao',
+      title: 'Đơn giao W-10000000 &amp; Thu nợ',
+      name: 'Tạp hoá chú Chín',
+      meta: '99916243 · W-10000000',
+      address: '33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh',
+      phone: '0898455860',
+      sl: '3', line: '3', weight: '6.6 kg', orderVal: '3.500.000 ₫',
+      products: [
+        { name: 'Nước nắm Chinsu 365', sku: 'SP 001 · 2.4kg/thùng', sl: '2 thùng', amt: '3.000.000 ₫' },
+        { name: 'Wakeup 247',          sku: 'SP 003 · 2.4kg/lốc',  sl: '2 lốc',   amt: '500.000 ₫' },
+      ],
+      hasNo: true,
+      noVal: '2.500.000 ₫',
+      total: '10.000.000 ₫',
+      confirmBtn: 'Thu tiền và xác nhận giao',
+    },
+    'sau-no': {
+      screen: 'thu-no',
+      name: 'Tạp hoá Sáu Nở',
+      meta: '99916243 · W-10000000',
+      address: '33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh',
+      phone: '0898455860',
+      noVal: '2.500.000 ₫',
+    },
+  };
+
+  // ── Screen navigation ───────────────────────────────
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active', 'off-right', 'off-left');
+      s.classList.add('off-right');
+    });
+    const target = document.getElementById(id);
+    target.classList.remove('off-right');
+    target.classList.add('active');
+
+    if (id !== 'screen-list') {
+      document.getElementById('screen-list').classList.remove('off-right');
+      document.getElementById('screen-list').classList.add('off-left');
+    }
+  }
+
+  function goBack() {
+    document.querySelectorAll('.screen').forEach(s => {
+      s.classList.remove('active', 'off-right', 'off-left');
+      s.classList.add('off-right');
+    });
+    const list = document.getElementById('screen-list');
+    list.classList.remove('off-right');
+    list.classList.add('active');
+  }
+
+  // ── Populate giao detail ────────────────────────────
+  function populateGiao(card) {
+    document.getElementById('giao-title').innerHTML    = card.title;
+    document.getElementById('giao-name').textContent   = card.name;
+    document.getElementById('giao-meta').textContent   = card.meta;
+    document.getElementById('giao-address').textContent = card.address;
+    document.getElementById('giao-phone').textContent  = card.phone;
+    document.getElementById('giao-sl').textContent     = card.sl;
+    document.getElementById('giao-line').textContent   = card.line;
+    document.getElementById('giao-weight').textContent = card.weight;
+    document.getElementById('giao-order-val').textContent = card.orderVal;
+    document.getElementById('giao-total').textContent  = card.total;
+    document.getElementById('giao-btn-confirm').textContent = card.confirmBtn;
+
+    // Products
+    const tbody = document.getElementById('giao-products');
+    tbody.innerHTML = card.products.map(p => `
+      <div class="table-row">
+        <div class="table-cell-main"><div class="tbl-name">${p.name}</div><div class="tbl-sku">${p.sku}</div></div>
+        <div class="table-cell-sl"><div class="tbl-hdr">SL</div><div class="tbl-val">${p.sl}</div></div>
+        <div class="table-cell-amt"><div class="tbl-hdr">Thành tiền</div><div class="tbl-val">${p.amt}</div></div>
+      </div>`).join('');
+    document.getElementById('giao-table-title').textContent = `Chi tiết đơn hàng (${card.products.length})`;
+
+    // Nợ row
+    const noRow = document.getElementById('giao-no-row');
+    noRow.style.display = card.hasNo ? '' : 'none';
+    if (card.hasNo) document.getElementById('giao-no-val').textContent = card.noVal;
+  }
+
+  // ── Populate thu nợ detail ──────────────────────────
+  function populateThuNo(card) {
+    document.getElementById('thuno-name').textContent    = card.name;
+    document.getElementById('thuno-meta').textContent    = card.meta;
+    document.getElementById('thuno-address').textContent = card.address;
+    document.getElementById('thuno-phone').textContent   = card.phone;
+    document.getElementById('thuno-no-val').textContent  = card.noVal;
+  }
+
+  // ── Detail button clicks ────────────────────────────
+  document.querySelectorAll('.btn-detail').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const cardId = btn.dataset.card;
+      const card   = CARDS[cardId];
+      if (card.screen === 'giao') {
+        populateGiao(card);
+        showScreen('screen-detail-giao');
+      } else {
+        populateThuNo(card);
+        showScreen('screen-detail-thu-no');
+      }
+    });
+  });
+
+  document.getElementById('close-giao').addEventListener('click', goBack);
+  document.getElementById('close-thu-no').addEventListener('click', goBack);
+
+  // ── Auto-hide header ────────────────────────────────
   const header = document.getElementById('header');
   const main   = document.getElementById('main');
-  let lastY    = 0;
-  let ticking  = false;
+  let lastY = 0, ticking = false;
 
   main.addEventListener('scroll', () => {
     if (!ticking) {
       requestAnimationFrame(() => {
         const y = main.scrollTop;
-        if (y > lastY && y > 10) {
-          header.classList.add('hidden');
-        } else {
-          header.classList.remove('hidden');
-        }
-        lastY = y;
-        ticking = false;
+        header.classList.toggle('hidden', y > lastY && y > 10);
+        lastY = y; ticking = false;
       });
       ticking = true;
     }
   }, { passive: true });
 
+  // ── Bottom tabs ─────────────────────────────────────
   document.querySelectorAll('.tab-item').forEach(tab => {
     tab.addEventListener('click', () => {
       document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
@@ -678,34 +820,33 @@
     });
   });
 
-  // Dropdown
+  // ── Dropdown filter ─────────────────────────────────
   const trigger = document.getElementById('dropdownTrigger');
   const menu    = document.getElementById('dropdownMenu');
   const label   = document.getElementById('dropdownLabel');
 
-  trigger.addEventListener('click', (e) => {
+  trigger.addEventListener('click', e => {
     e.stopPropagation();
-    const isOpen = menu.classList.toggle('open');
-    trigger.classList.toggle('open', isOpen);
+    const open = menu.classList.toggle('open');
+    trigger.classList.toggle('open', open);
   });
 
   function filterCards(value) {
-    document.querySelectorAll('.task-card').forEach(card => {
-      const show = value === 'Tất cả' || card.dataset.type === value;
-      card.style.display = show ? '' : 'none';
+    document.querySelectorAll('.task-card').forEach(c => {
+      c.style.display = (value === 'Tất cả' || c.dataset.type === value) ? '' : 'none';
     });
   }
 
   menu.querySelectorAll('.dropdown-item').forEach(item => {
-    item.addEventListener('click', (e) => {
+    item.addEventListener('click', e => {
       e.stopPropagation();
-      const value = item.dataset.value;
-      label.textContent = 'Phân loại: ' + value;
+      const v = item.dataset.value;
+      label.textContent = 'Phân loại: ' + v;
       menu.querySelectorAll('.dropdown-item').forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
       menu.classList.remove('open');
       trigger.classList.remove('open');
-      filterCards(value);
+      filterCards(v);
     });
   });
 
@@ -714,6 +855,5 @@
     trigger.classList.remove('open');
   });
 </script>
-
 </body>
 </html>
