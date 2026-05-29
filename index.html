@@ -494,6 +494,13 @@
     .modal-amount-row { display: flex; align-items: center; gap: 16px; white-space: nowrap; }
     .modal-amount-lbl { font-size: 14px; color: var(--slate-500); }
     .modal-amount-val { flex: 1; font-size: 16px; font-weight: 600; color: #16a34a; text-align: right; }
+    .modal-upload-area {
+      border: 2px dashed #e1e7ef; border-radius: 8px;
+      height: 80px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      color: #65758b; font-size: 14px; cursor: pointer;
+    }
+    .modal-upload-area svg { opacity: 0.7; }
   </style>
 </head>
 <body>
@@ -900,27 +907,7 @@
       </div>
 
       <div class="modal-body">
-        <div class="modal-table">
-          <div class="modal-table-head">SO công nợ gắn với phiếu (1)</div>
-          <div class="modal-table-row">
-            <div class="modal-tcell-main">
-              <div class="modal-tcell-name">DH200010</div>
-              <div class="modal-tcell-desc">23/04/2026</div>
-            </div>
-            <div class="modal-tcell-right">
-              <div class="modal-tcell-lbl">Đã thu</div>
-              <div class="modal-tcell-val" id="modal-da-thu">0 ₫</div>
-            </div>
-            <div class="modal-tcell-right">
-              <div class="modal-tcell-lbl">Nợ cần thu</div>
-              <div class="modal-tcell-val" id="modal-no-can-thu">2.500.000 ₫</div>
-            </div>
-          </div>
-          <div class="modal-table-footer">
-            <span class="modal-footer-lbl">Tổng cần thu</span>
-            <span class="modal-footer-val" id="modal-tong-thu">2.500.000 ₫</span>
-          </div>
-        </div>
+        <div id="modal-table-container"></div>
 
         <div class="modal-section">
           <div class="modal-section-title">Mức thu</div>
@@ -939,13 +926,20 @@
         <div class="modal-section">
           <div class="modal-section-title">Hình thức thanh toán</div>
           <div class="modal-radio-group">
-            <div class="modal-radio-item" data-group="hinh-thuc">
-              <div class="radio-dot"></div>
-              <span>Chuyển khoản</span>
-            </div>
             <div class="modal-radio-item selected" data-group="hinh-thuc">
               <div class="radio-dot selected"></div>
+              <span>Chuyển khoản</span>
+            </div>
+            <div class="modal-radio-item" data-group="hinh-thuc">
+              <div class="radio-dot"></div>
               <span>Tiền mặt</span>
+            </div>
+          </div>
+          <div class="modal-section" style="gap:6px">
+            <div style="font-size:14px;font-weight:400;color:#0f172a">Hình ảnh chứng từ (0)</div>
+            <div class="modal-upload-area">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <span>Chụp/Upload ảnh chứng từ</span>
             </div>
           </div>
         </div>
@@ -983,6 +977,11 @@
       noVal: '',
       total: '7.500.000 ₫',
       confirmBtn: 'Thu tiền và xác nhận giao',
+      modalType: 'giao',
+      debtOrders: [
+        { so: 'DH200011', date: '23/05/2026', daThu: '_', canThu: '7.500.000 ₫' },
+      ],
+      tongCanThu: '7.500.000 ₫',
     },
     'chu-chin': {
       screen: 'giao',
@@ -1000,6 +999,12 @@
       noVal: '2.500.000 ₫',
       total: '10.000.000 ₫',
       confirmBtn: 'Thu tiền và xác nhận giao',
+      modalType: 'giao-thu-no',
+      debtOrders: [
+        { so: 'DH200010', date: '23/04/2026', daThu: '2.500.000 ₫', canThu: '2.500.000 ₫' },
+        { so: 'DH200011', date: '23/05/2026', daThu: '_',            canThu: '7.500.000 ₫' },
+      ],
+      tongCanThu: '10.000.000 ₫',
     },
     'sau-no': {
       screen: 'thu-no',
@@ -1008,6 +1013,11 @@
       address: '33 Nguyễn Đình Chiểu, Phường Bến Thành, TP. Hồ Chí Minh',
       phone: '0898455860',
       noVal: '2.500.000 ₫',
+      modalType: 'thu-no',
+      debtOrders: [
+        { so: 'DH200009', date: '10/04/2026', daThu: '_', canThu: '2.500.000 ₫' },
+      ],
+      tongCanThu: '2.500.000 ₫',
     },
   };
 
@@ -1224,22 +1234,51 @@
 
   // ── Payment modal ────────────────────────────────────
   function openModal(cardId) {
-    const card   = CARDS[cardId];
-    const amount = card.noVal || card.total || '';
+    const card = CARDS[cardId];
+    const isGiaoThuNo = card.modalType === 'giao-thu-no';
+    const isGiao      = card.modalType === 'giao';
+    const col3Label   = isGiao ? 'Cần thu' : 'Nợ cần thu';
+    const orders      = card.debtOrders || [];
+
     document.getElementById('modal-pt-title').textContent    = 'Phiếu thu PT50000';
     document.getElementById('modal-pt-subtitle').textContent = card.name + ' · ' + card.phone;
-    document.getElementById('modal-da-thu').textContent      = '0 ₫';
-    document.getElementById('modal-no-can-thu').textContent  = amount;
-    document.getElementById('modal-tong-thu').textContent    = amount;
-    document.getElementById('modal-ghi-nhan').textContent    = amount;
-    // reset radios to default
+    document.getElementById('modal-ghi-nhan').textContent    = card.tongCanThu || '';
+
+    // Build table
+    const rowsHtml = orders.map(o => `
+      <div class="modal-table-row">
+        <div class="modal-tcell-main">
+          <div class="modal-tcell-name">${o.so}</div>
+          <div class="modal-tcell-desc">${o.date}</div>
+        </div>
+        <div class="modal-tcell-right">
+          <div class="modal-tcell-lbl">Đã thu</div>
+          <div class="modal-tcell-val">${o.daThu}</div>
+        </div>
+        <div class="modal-tcell-right">
+          <div class="modal-tcell-lbl">${col3Label}</div>
+          <div class="modal-tcell-val">${o.canThu}</div>
+        </div>
+      </div>`).join('');
+
+    document.getElementById('modal-table-container').innerHTML = `
+      <div class="modal-table">
+        <div class="modal-table-head">SO công nợ gắn với phiếu (${orders.length})</div>
+        ${rowsHtml}
+        <div class="modal-table-footer">
+          <span class="modal-footer-lbl">Tổng cần thu</span>
+          <span class="modal-footer-val">${card.tongCanThu || ''}</span>
+        </div>
+      </div>`;
+
+    // Reset radios
     document.querySelectorAll('.modal-radio-item[data-group="muc-thu"]').forEach((el, i) => {
       el.classList.toggle('selected', i === 0);
       el.querySelector('.radio-dot').classList.toggle('selected', i === 0);
     });
     document.querySelectorAll('.modal-radio-item[data-group="hinh-thuc"]').forEach((el, i) => {
-      el.classList.toggle('selected', i === 1);
-      el.querySelector('.radio-dot').classList.toggle('selected', i === 1);
+      el.classList.toggle('selected', i === 0);
+      el.querySelector('.radio-dot').classList.toggle('selected', i === 0);
     });
     document.getElementById('modal-thu-tien').classList.add('open');
   }
