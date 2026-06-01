@@ -425,17 +425,76 @@
     }
     .proof-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+    /* ── Tạo phiếu thu form ─────────────────────────────── */
+    .form-section { display: flex; flex-direction: column; gap: 8px; }
+    .form-label-lg { font-size: 16px; font-weight: 600; color: #0f172a; line-height: 24px; }
+    .form-label-sm { font-size: 14px; font-weight: 500; color: #0f172a; line-height: 20px; }
+    .nbl-wrap { position: relative; }
+    .nbl-trigger {
+      display: flex; align-items: center; gap: 8px;
+      width: 100%; height: 40px; padding: 0 16px;
+      background: white; border: 1px solid #cbd5e1; border-radius: 8px;
+      font-size: 14px; font-weight: 500; color: #09090b;
+      cursor: pointer; user-select: none; font-family: 'Inter', sans-serif;
+      box-sizing: border-box;
+    }
+    .nbl-label { flex: 1; text-align: left; }
+    .nbl-trigger .chevron { transition: transform 0.2s ease; flex-shrink: 0; }
+    .nbl-trigger.open .chevron { transform: rotate(180deg); }
+    .nbl-menu {
+      display: none; position: absolute;
+      top: calc(100% + 4px); left: 0; right: 0;
+      background: white; border: 1px solid #cbd5e1; border-radius: 8px;
+      box-shadow: 0 4px 6px -1px rgba(26,26,26,0.07);
+      z-index: 60; padding: 4px;
+    }
+    .nbl-menu.open { display: block; }
+    .nbl-item {
+      display: flex; align-items: center; padding: 8px 10px;
+      border-radius: 6px; font-size: 14px; font-weight: 400; color: #09090b;
+      cursor: pointer;
+    }
+    .nbl-item:hover, .nbl-item.selected { background: #f1f5f9; }
+    .form-input-ro {
+      width: 100%; height: 40px; padding: 0 12px;
+      background: #f8fafc; border: none; border-radius: 10px;
+      font-size: 14px; font-weight: 400; color: #0f172a;
+      font-family: 'Inter', sans-serif; display: flex; align-items: center;
+      box-sizing: border-box;
+    }
+    .bottom-bar {
+      flex-shrink: 0; background: white;
+      box-shadow: 0 -1px 3px rgba(26,26,26,0.06);
+      padding: 12px 16px 0;
+    }
+    .bottom-btns { display: flex; gap: 12px; }
+    .btn-outline-full {
+      flex: 1; height: 40px; border: 1px solid #cbd5e1; border-radius: 8px;
+      background: white; font-size: 14px; font-weight: 500; color: #09090b;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+    .btn-primary-full {
+      flex: 1; height: 40px; border: none; border-radius: 8px;
+      background: #2563eb; font-size: 14px; font-weight: 500; color: white;
+      font-family: 'Inter', sans-serif; cursor: pointer;
+    }
+    .btn-primary-full:active { opacity: 0.85; }
+    .home-ind { display: flex; justify-content: center; padding: 8px 0; }
+    .home-ind-bar { width: 139px; height: 5px; background: #0a0a0a; border-radius: 100px; }
+
     /* ── Detail screens slide from bottom ─────────────── */
     #screen-detail-giao,
     #screen-detail-thu-no,
     #screen-detail-don-da-len,
     #screen-detail-hs-thatbai,
-    #screen-detail-hs-hoanthat { z-index: 10; }
+    #screen-detail-hs-hoanthat,
+    #screen-tao-phieu-thu { z-index: 10; }
     #screen-detail-giao.off-right,
     #screen-detail-thu-no.off-right,
     #screen-detail-don-da-len.off-right,
     #screen-detail-hs-thatbai.off-right,
-    #screen-detail-hs-hoanthat.off-right { transform: translateY(100%); }
+    #screen-detail-hs-hoanthat.off-right,
+    #screen-tao-phieu-thu.off-right { transform: translateY(100%); }
     /* parent tab stays in place when detail slides up over it */
     #screen-list.stay,
     #screen-don-du-kien.stay,
@@ -587,7 +646,7 @@
 
         <div class="page-header">
           <h1 class="page-title">Cần thực hiện</h1>
-          <button class="btn-primary">Tạo phiếu thu</button>
+          <button class="btn-primary" onclick="showScreen('screen-tao-phieu-thu')">Tạo phiếu thu</button>
         </div>
 
         <div class="stats-row">
@@ -728,6 +787,56 @@
     </nav>
 
   </div><!-- /screen-list -->
+
+
+  <!-- ══ SCREEN: TẠO PHIẾU THU ════════════════════════ -->
+  <div class="screen off-right" id="screen-tao-phieu-thu">
+
+    <!-- Header -->
+    <div class="detail-header">
+      <button class="detail-close" onclick="goBack()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+      </button>
+      <span class="detail-title">Tạo phiếu thu</span>
+    </div>
+
+    <!-- Main -->
+    <div class="detail-main" style="gap:16px;">
+
+      <!-- Section: Chọn NBL -->
+      <div class="form-section">
+        <div class="form-label-lg">Chọn nhà bán lẻ còn nợ</div>
+        <div class="nbl-wrap">
+          <button class="nbl-trigger" id="nbl-trigger" onclick="toggleNblMenu(event)">
+            <span class="nbl-label" id="nbl-label">Chọn nhà bán lẻ</span>
+            <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+          <div class="nbl-menu" id="nbl-menu">
+            <div class="nbl-item" data-nbl="co-thu" onclick="selectNbl(this)">Tạp hoá cô Thu</div>
+            <div class="nbl-item" data-nbl="chu-chin" onclick="selectNbl(this)">Tạp hoá chú Chín</div>
+            <div class="nbl-item" data-nbl="sau-no" onclick="selectNbl(this)">Tạp hoá Sáu Nở</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: Người giao hàng -->
+      <div class="form-section">
+        <div class="form-label-sm">Người giao hàng</div>
+        <div class="form-input-ro">Nguyễn Văn A · SHP-1001</div>
+      </div>
+
+    </div><!-- /detail-main -->
+
+    <!-- Bottom bar -->
+    <div class="bottom-bar">
+      <div class="bottom-btns">
+        <button class="btn-outline-full" onclick="goBack()">Huỷ</button>
+        <button class="btn-primary-full" onclick="goBack()">Tạo phiếu thu</button>
+      </div>
+      <div class="home-ind"><div class="home-ind-bar"></div></div>
+    </div>
+
+  </div><!-- /screen-tao-phieu-thu -->
 
 
   <!-- ══ SCREEN: ĐƠN DỰ KIẾN ══════════════════════════ -->
@@ -1694,6 +1803,7 @@
   // ── Screen navigation ───────────────────────────────
   // Maps each detail screen to its parent tab screen
   const DETAIL_PARENT = {
+    'screen-tao-phieu-thu':        'screen-list',
     'screen-detail-giao':          'screen-list',
     'screen-detail-thu-no':        'screen-list',
     'screen-detail-don-da-len':    'screen-don-du-kien',
@@ -1910,7 +2020,25 @@
     trigger.classList.remove('open');
     hsMenu.classList.remove('open');
     hsTrigger.classList.remove('open');
+    document.getElementById('nbl-menu').classList.remove('open');
+    document.getElementById('nbl-trigger').classList.remove('open');
   });
+
+  // ── NBL dropdown (Tạo phiếu thu) ────────────────────
+  function toggleNblMenu(e) {
+    e.stopPropagation();
+    const nblMenu = document.getElementById('nbl-menu');
+    const nblTrigger = document.getElementById('nbl-trigger');
+    const open = nblMenu.classList.toggle('open');
+    nblTrigger.classList.toggle('open', open);
+  }
+  function selectNbl(el) {
+    document.querySelectorAll('.nbl-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('nbl-label').textContent = el.textContent.trim();
+    document.getElementById('nbl-menu').classList.remove('open');
+    document.getElementById('nbl-trigger').classList.remove('open');
+  }
 
   // ── Lịch sử dropdown filter ──────────────────────────
   const hsTrigger = document.getElementById('hs-dropdownTrigger');
