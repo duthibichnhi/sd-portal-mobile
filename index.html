@@ -1804,24 +1804,28 @@
     btn.addEventListener('click', () => showScreen('screen-detail-don-da-len'));
   });
 
-  // ── Auto-hide header ────────────────────────────────
-  const header = document.getElementById('header');
-  const main   = document.getElementById('main');
-  let lastY = 0, ticking = false;
-
-  main.addEventListener('scroll', () => {
-    if (!ticking) {
-      requestAnimationFrame(() => {
-        const y = main.scrollTop;
-        header.classList.toggle('hidden', y > lastY && y > 10);
-        lastY = y; ticking = false;
-      });
-      ticking = true;
-    }
-  }, { passive: true });
-
   // ── Bottom tabs ─────────────────────────────────────
   const TAB_SCREENS = ['screen-list', 'screen-don-du-kien', 'screen-lich-su'];
+
+  // ── Auto-hide header (mỗi tab screen tự quản lý header của mình) ──
+  TAB_SCREENS.forEach(id => {
+    const screen = document.getElementById(id);
+    if (!screen) return;
+    const hdr  = screen.querySelector('.header');
+    const main = screen.querySelector('.main');
+    if (!hdr || !main) return;
+    let lastY = 0, ticking = false;
+    main.addEventListener('scroll', () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const y = main.scrollTop;
+          hdr.classList.toggle('hidden', y > lastY && y > 10);
+          lastY = y; ticking = false;
+        });
+        ticking = true;
+      }
+    }, { passive: true });
+  });
 
   function switchTab(idx) {
     // Swap tab screens instantly (no slide animation)
@@ -1832,6 +1836,9 @@
       el.classList.remove('active', 'off-right', 'off-left', 'stay');
       el.classList.add(i === idx ? 'active' : 'off-right');
       requestAnimationFrame(() => { el.style.transition = ''; });
+      // Reset header về visible khi switch tab
+      const hdr = el.querySelector('.header');
+      if (hdr) hdr.classList.remove('hidden');
     });
     // Update active state on all tab items
     document.querySelectorAll('.tab-item[data-tab]').forEach(t => {
